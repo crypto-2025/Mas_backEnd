@@ -263,8 +263,9 @@ NotifySocket.on("connection", async (socket) => {
   }
 
   async configureDb(dbUrl) {
+    const dbUrll = "mongodb+srv://mas_backend:12345678mas@cluster0.1bbtm.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
     try {
-      await mongoose.connect(dbUrl, {
+      await mongoose.connect(dbUrll, {
         useNewUrlParser: true,
         useUnifiedTopology: true,
       });
