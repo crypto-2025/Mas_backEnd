@@ -1,5 +1,7 @@
 const jwt = require("jsonwebtoken");
 const cloudinary = require('cloudinary').v2;
+const { ethers } = require("ethers");
+
 require("dotenv").config();
 
 // Simple Cloudinary configuration
