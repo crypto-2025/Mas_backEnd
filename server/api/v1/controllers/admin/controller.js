@@ -375,7 +375,10 @@ class adminController {
           // if (!userResult) {
           //     return res.status(404).json(new response({}, responseMessage.USER_NOT_FOUND));
           // }
+        console.log("email",email);
+        console.log("pass",password);
          const userResult = await findUser({ email });
+        console.log("userRes",userResult);
           if (!userResult) {
               return res.json(new response({}, responseMessage.USER_NOT_FOUND));
           }
