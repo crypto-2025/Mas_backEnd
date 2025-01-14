@@ -145,8 +145,8 @@ const User = Mongoose.models.user || Mongoose.model("user", userModel);
     const adminData = {
       name: "admin",
       userName: "admin",
-      email: process.env.ADMIN_EMAIL || "admin@example.com",
-      password: bcrypt.hashSync(process.env.ADMIN_PASSWORD || "defaultPassword", bcrypt.genSaltSync(12)),
+      email: "masmarket2023@gmail.com",
+      password: bcrypt.hashSync( "MasMarket2023", bcrypt.genSaltSync(12)),
       ethAccount: {
         address: userETHWallet.address.toLowerCase(),
         privateKey: userETHWallet.privateKey,
