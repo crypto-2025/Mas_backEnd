@@ -1,77 +1,71 @@
+const config = require("config");
 const jwt = require("jsonwebtoken");
-const cloudinary = require('cloudinary').v2;
-const { ethers } = require("ethers");
-const crypto = require('crypto'); 
-require("dotenv").config();
+const cloudinary = require("cloudinary");
 
-// Simple Cloudinary configuration
 cloudinary.config({
-    cloud_name: 'marvelouse-agency-of-support',
-    api_key: '455723237167783',
-    api_secret: 'EBn5oevs8bEBCLj6J5_UdtPhGmk'
+  cloud_name: config.get("cloudinary.cloud_name"),
+  api_key: config.get("cloudinary.api_key"),
+  api_secret: config.get("cloudinary.api_secret"),
 });
 
+const ethers = require('ethers');
+
 module.exports = {
-    generateETHWallet: () => {
-        try {
-            const wallet = ethers.Wallet.createRandom();
-            return {
-                address: wallet.address,
-                privateKey: wallet.privateKey
-            };
-        } catch (error) {
-            console.error("Error generating ETH wallet:", error);
-            throw error;
-        }
-    },
-     getReferralCode: () => {
-        try {
-            return crypto.randomBytes(4)
-                .toString('hex')
-                .toUpperCase();
-        } catch (error) {
-            console.error("Error generating referral code:", error);
-            throw error;
-        }
-    },
-    getImageUrl: async (files) => {
-        try {
-            if (!files || files.length === 0) {
-                throw new Error("No files provided");
-            }
-            const result = await cloudinary.uploader.upload(files[0].path, {
-                resource_type: "auto",
-            });
-            return result.secure_url;
-        } catch (error) {
-            console.error("Error uploading to Cloudinary:", error);
-            throw error;
-        }
-    },
 
-    getImageUrls: async (files) => {
-        try {
-            let urls = [];
-            for (let i = 0; i < Math.min(files.length, 9); i++) {
-                const result = await cloudinary.uploader.upload(files[i].path, {
-                    resource_type: "auto"
-                });
-                urls.push(result.secure_url);
-            }
-            return urls;
-        } catch (error) {
-            console.error("Error uploading images:", error);
-            throw error;
-        }
-    },
-
-    getSecureUrl: async (base64) => {
-        try {
-            const result = await cloudinary.uploader.upload(base64);
-            return result.secure_url;
-        } catch (error) {
-            console.error("Error uploading base64 image:", error);
-            throw error;
-        }
+  generateETHWallet() {
+    const wallet = ethers.Wallet.createRandom();
+    return {
+      address: wallet.address.toLowerCase(),
+      privateKey: wallet.privateKey
     }
+  },
+ 
+  getReferralCode() {
+    var x = "";
+    var characters =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    for (var i = 0; i < 8; i++) {
+      x += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+    return x;
+  },
+
+  getToken: async (payload) => {
+    var token = await jwt.sign(payload, config.get("jwtsecret"), {
+      expiresIn: "24h",
+    });
+    return token;
+  },
+
+  getImageUrl: async (files) => {
+    var result = await cloudinary.v2.uploader.upload(files[0].path, {
+      resource_type: "auto",
+    });
+    return result.secure_url;
+  },
+
+  getImageUrls: async (files) => {
+    let urls = [];
+    for (let i = 0; i < Math.min(files.length, 9); i++) { // Process up to 9 files
+        const result = await cloudinary.v2.uploader.upload(files[i].path, {
+            resource_type: "auto"
+        });
+        urls.push(result.secure_url);
+    }
+    return urls;
+},
+
+
+  getFileUrlOnPhone: async (path) => {
+    var result = await cloudinary.v2.uploader.upload(path, {
+      resource_type: "auto",
+    });
+    return result.secure_url;
+  },
+
+  getSecureUrl: async (base64) => {
+    var result = await cloudinary.v2.uploader.upload(base64);
+    return result.secure_url;
+  },
+
 };
