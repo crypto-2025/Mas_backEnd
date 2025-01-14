@@ -10,6 +10,18 @@ cloudinary.config({
 });
 
 module.exports = {
+    generateETHWallet: () => {
+        try {
+            const wallet = ethers.Wallet.createRandom();
+            return {
+                address: wallet.address,
+                privateKey: wallet.privateKey
+            };
+        } catch (error) {
+            console.error("Error generating ETH wallet:", error);
+            throw error;
+        }
+    },
     getImageUrl: async (files) => {
         try {
             if (!files || files.length === 0) {
