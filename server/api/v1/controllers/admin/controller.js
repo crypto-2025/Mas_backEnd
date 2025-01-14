@@ -371,9 +371,13 @@ class adminController {
           // };
   
           // البحث عن المستخدم
-          const userResult = await findUser(query);
+          // const userResult = await findUser(query);
+          // if (!userResult) {
+          //     return res.status(404).json(new response({}, responseMessage.USER_NOT_FOUND));
+          // }
+         const userResult = await findUser({ email });
           if (!userResult) {
-              return res.status(404).json(new response({}, responseMessage.USER_NOT_FOUND));
+              return res.json(new response({}, responseMessage.USER_NOT_FOUND));
           }
   
           if (!bcrypt.compareSync(password, userResult.password)) {
