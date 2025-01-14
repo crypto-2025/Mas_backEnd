@@ -42,14 +42,15 @@ module.exports = {
             throw error;
         }
     },
-    getReferralCode: () => {
-        try {
-            return crypto.randomBytes(4).toString('hex').toUpperCase();
-        } catch (error) {
-            console.error("Error generating referral code:", error);
-            throw error;
-        }
-    },
+     getReferralCode() {
+    var x = "";
+    var characters =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    for (var i = 0; i < 8; i++) {
+      x += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+    return x;
+  },
     getImageUrl: async (files) => {
         try {
             if (!files || files.length === 0) {
