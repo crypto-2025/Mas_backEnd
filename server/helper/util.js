@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 const cloudinary = require('cloudinary').v2;
 const { ethers } = require("ethers");
-
+const crypto = require('crypto'); 
 require("dotenv").config();
 
 // Simple Cloudinary configuration
@@ -21,6 +21,16 @@ module.exports = {
             };
         } catch (error) {
             console.error("Error generating ETH wallet:", error);
+            throw error;
+        }
+    },
+     getReferralCode: () => {
+        try {
+            return crypto.randomBytes(4)
+                .toString('hex')
+                .toUpperCase();
+        } catch (error) {
+            console.error("Error generating referral code:", error);
             throw error;
         }
     },
