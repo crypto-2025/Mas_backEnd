@@ -362,24 +362,25 @@ class adminController {
           // تحقق من صحة البيانات
           const { email, password } = await validationSchema.validateAsync(req.body);
           
-          // بناء الاستعلام للبحث عن المستخدم
-          let query = {
-              $and: [
-                  { userType: { $in: [userType.ADMIN, userType.SUB_ADMIN] } },
-                  { $or: [{ email: email }, { userName: email }] },
-              ],
-          };
+         // // بناء الاستعلام للبحث عن المستخدم
+          // let query = {
+          //     $and: [
+          //         { userType: { $in: [userType.ADMIN, userType.SUB_ADMIN] } },
+          //         { $or: [{ email: email }, { userName: email }] },
+          //     ],
+          // };
   
           // البحث عن المستخدم
-          var userResult = await findUser(query);
+          const userResult = await findUser(query);
           if (!userResult) {
               return res.status(404).json(new response({}, responseMessage.USER_NOT_FOUND));
           }
   
-          // التحقق من كلمة المرور
           if (!bcrypt.compareSync(password, userResult.password)) {
-              return res.status(401).json(new response({}, responseMessage.INCORRECT_LOGIN));
-          }
+            return res
+                .status(400)
+                .json(new response({}, responseMessage.INCORRECT_LOGIN));
+        }
   
           // إنشاء التوكن
           let token = await commonFunction.getToken({
