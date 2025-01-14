@@ -353,42 +353,33 @@ class adminController {
  
   async login(req, res, next) {
       // تعريف المخطط باستخدام Joi
-         console.log("email",req.body.email);
       const validationSchema = Joi.object({
           email: Joi.string().email().required(),
           password: Joi.string().required(),
       });
   
-   
       try {
           // تحقق من صحة البيانات
           const { email, password } = await validationSchema.validateAsync(req.body);
           
-         // // بناء الاستعلام للبحث عن المستخدم
-          // let query = {
-          //     $and: [
-          //         { userType: { $in: [userType.ADMIN, userType.SUB_ADMIN] } },
-          //         { $or: [{ email: email }, { userName: email }] },
-          //     ],
-          // };
+          // بناء الاستعلام للبحث عن المستخدم
+          let query = {
+              $and: [
+                  { userType: { $in: [userType.ADMIN, userType.SUB_ADMIN] } },
+                  { $or: [{ email: email }, { userName: email }] },
+              ],
+          };
   
           // البحث عن المستخدم
-          // const userResult = await findUser(query);
-          // if (!userResult) {
-          //     return res.status(404).json(new response({}, responseMessage.USER_NOT_FOUND));
-          // }
-        console.log("pass",password);
-         const userResult = await findUser({ email });
-        console.log("userRes",userResult);
+          var userResult = await findUser(query);
           if (!userResult) {
-              return res.json(new response({}, responseMessage.USER_NOT_FOUND));
+              return res.status(404).json(new response({}, responseMessage.USER_NOT_FOUND));
           }
   
+          // التحقق من كلمة المرور
           if (!bcrypt.compareSync(password, userResult.password)) {
-            return res
-                .status(400)
-                .json(new response({}, responseMessage.INCORRECT_LOGIN));
-        }
+              return res.status(401).json(new response({}, responseMessage.INCORRECT_LOGIN));
+          }
   
           // إنشاء التوكن
           let token = await commonFunction.getToken({
@@ -1184,6 +1175,198 @@ class adminController {
    *         description: Returns success message
    */
 
+  // async dashboard(req, res, next) {
+  //   var fromDate, toDate, data, bundleCount, userCounts;
+  //   var uniqueWalletConnected = 0;
+  //   var userCount = 0;
+  //   var adminCount = 0;
+  //   var subscriberCount = 0;
+  //   var creatorCount = 0;
+  //   const validationSchema = {
+  //     searchBy: Joi.string().optional(),
+  //   };
+  //   try {
+  //     const { searchBy } = await Joi.validate(req.query, validationSchema);
+  //     let userResult = await findUser({ _id: req.userId });
+  //     if (!userResult) {
+  //       return apiError.notFound(responseMessage.USER_NOT_FOUND);
+  //     }
+  //     let d = new Date();
+  //     toDate = new Date().toISOString();
+  //     if (searchBy == "Daily") {
+  //       let oneDayFromNow = d.setDate(d.getDate() - 1);
+  //       fromDate = new Date(oneDayFromNow).toISOString();
+  //       data = async () => {
+  //         return await getData(donationModel, searchBy, fromDate, toDate);
+  //       };
+  //       userCounts = async () => {
+  //         return await getData(userModel, searchBy, fromDate, toDate);
+  //       };
+  //       bundleCount = async () => {
+  //         return await getData(nftModel, searchBy, fromDate, toDate);
+  //       };
+  //       [data, userCounts, bundleCount] = await Promise.all([
+  //         data(),
+  //         userCounts(),
+  //         bundleCount(),
+  //       ]);
+  //     }
+  //     if (searchBy == "Weekly") {
+  //       let sevenDaysFromNow = d.setDate(d.getDate() - 7);
+  //       fromDate = new Date(sevenDaysFromNow).toISOString();
+  //       data = async () => {
+  //         return await getData(donationModel, searchBy, fromDate, toDate);
+  //       };
+  //       userCounts = async () => {
+  //         return await getData(userModel, searchBy, fromDate, toDate);
+  //       };
+  //       bundleCount = async () => {
+  //         return await getData(nftModel, searchBy, fromDate, toDate);
+  //       };
+  //       [data, userCounts, bundleCount] = await Promise.all([
+  //         data(),
+  //         userCounts(),
+  //         bundleCount(),
+  //       ]);
+  //     }
+  //     if (searchBy == "Monthly") {
+  //       let thirtyDaysFromNow = d.setDate(d.getDate() - 30);
+  //       fromDate = new Date(thirtyDaysFromNow).toISOString();
+  //       data = async () => {
+  //         return await getData(donationModel, searchBy, fromDate, toDate);
+  //       };
+  //       userCounts = async () => {
+  //         return await getData(userModel, searchBy, fromDate, toDate);
+  //       };
+  //       bundleCount = async () => {
+  //         return await getData(nftModel, searchBy, fromDate, toDate);
+  //       };
+  //       [data, userCounts, bundleCount] = await Promise.all([
+  //         data(),
+  //         userCounts(),
+  //         bundleCount(),
+  //       ]);
+  //     }
+  //     if (searchBy == "Yearly") {
+  //       let oneYearFromNow = d.setDate(d.getDate() - 365);
+  //       fromDate = new Date(oneYearFromNow).toISOString();
+  //       data = async () => {
+  //         return await getData(donationModel, searchBy, fromDate, toDate);
+  //       };
+  //       userCounts = async () => {
+  //         return await getData(userModel, searchBy, fromDate, toDate);
+  //       };
+  //       bundleCount = async () => {
+  //         return await getData(nftModel, searchBy, fromDate, toDate);
+  //       };
+  //       [data, userCounts, bundleCount] = await Promise.all([
+  //         data(),
+  //         userCounts(),
+  //         bundleCount(),
+  //       ]);
+  //     }
+  //     if (searchBy == "All") {
+  //       data = async () => {
+  //         return await getData(donationModel, searchBy, fromDate, toDate);
+  //       };
+  //       userCounts = async () => {
+  //         return await getData(userModel, searchBy, fromDate, toDate);
+  //       };
+  //       bundleCount = async () => {
+  //         return await getData(nftModel, searchBy, fromDate, toDate);
+  //       };
+  //       [data, userCounts, bundleCount] = await Promise.all([
+  //         data(),
+  //         userCounts(),
+  //         bundleCount(),
+  //       ]);
+  //     }
+  //     if (userCounts.length != 0) {
+  //       for (let j of userCounts) {
+  //         if (j.userType === "Creator") {
+  //           (userCount += 1), (creatorCount += 1);
+  //         } else if (j.userType === "User") {
+  //           (uniqueWalletConnected += 1), (subscriberCount += 1);
+  //         } else {
+  //           adminCount += 1;
+  //         }
+  //       }
+  //     }
+  //     let obj = {
+  //       userCount: userCount,
+  //       uniqueWalletConnected: uniqueWalletConnected,
+  //       adminCount: adminCount,
+  //       bundleCount: bundleCount.length,
+  //       donationSent: data.length,
+  //       subscriberCount: subscriberCount,
+  //       creatorCount: creatorCount,
+  //     };
+  //     return res.json(new response(obj, responseMessage.DATA_FOUND));
+  //   } catch (error) {
+  //     return next(error);
+  //   }
+  // }
+
+  // /**
+  //  * @swagger
+  //  * /admin/totalAdminBalance:
+  //  *   get:
+  //  *     tags:
+  //  *       - ADMIN
+  //  *     description: totalAdminBalance
+  //  *     produces:
+  //  *       - application/json
+  //  *     parameters:
+  //  *       - name: token
+  //  *         description: token
+  //  *         in: header
+  //  *         required: true
+  //  *     responses:
+  //  *       200:
+  //  *         description: Returns success message
+  //  */
+
+  // async totalAdminBalance(req, res, next) {
+  //   try {
+  //     let adminResult = await findUser({
+  //       _id: req.userId,
+  //       userType: userType.ADMIN,
+  //     });
+  //     if (!adminResult) {
+  //       return apiError.notFound(responseMessage.USER_NOT_FOUND);
+  //     }
+
+  //     const mas = async () => {
+  //       return await bnb.mas.balance(adminResult.ethAccount.address);
+  //     };
+  //     const _bnb = async () => {
+  //       return web3.utils.fromWei(
+  //         await bnb.balance(adminResult.ethAccount.address)
+  //       );
+  //     };
+  //     const usdt = async () => {
+  //       return await bnb.usdt.balance(adminResult.ethAccount.address);
+  //     };
+  //     const fdusd = async () => {
+  //       return await bnb.fdusd.balance(adminResult.ethAccount.address);
+  //     };
+  //     const [masBalance, bnbBalance, usdtBalance, fdusdBalance] =
+  //       await Promise.all([mas(), _bnb(), usdt(), fdusd()]);
+
+  //     var obj = {
+  //       masBalance,
+  //       bnbBalance,
+  //       usdtBalance,
+  //       fdusdBalance,
+  //     };
+
+  //     return res.json(new response(obj, responseMessage.DATA_FOUND));
+  //   } catch (error) {
+  //     return next(error);
+  //   }
+  // }
+
+
   async dashboard(req, res, next) {
     var fromDate, toDate, data, bundleCount, userCounts;
     var uniqueWalletConnected = 0;
@@ -1191,105 +1374,55 @@ class adminController {
     var adminCount = 0;
     var subscriberCount = 0;
     var creatorCount = 0;
+    
     const validationSchema = {
       searchBy: Joi.string().optional(),
     };
+    
     try {
-      const { searchBy } = await Joi.validate(req.query, validationSchema);
+      // Using Joi.object().validate() for validation
+      const { searchBy } = Joi.object(validationSchema).validate(req.query);
+      
+      // Check if user exists
       let userResult = await findUser({ _id: req.userId });
       if (!userResult) {
         return apiError.notFound(responseMessage.USER_NOT_FOUND);
       }
+  
       let d = new Date();
       toDate = new Date().toISOString();
+  
+      // Handle different searchBy conditions
       if (searchBy == "Daily") {
         let oneDayFromNow = d.setDate(d.getDate() - 1);
         fromDate = new Date(oneDayFromNow).toISOString();
-        data = async () => {
-          return await getData(donationModel, searchBy, fromDate, toDate);
-        };
-        userCounts = async () => {
-          return await getData(userModel, searchBy, fromDate, toDate);
-        };
-        bundleCount = async () => {
-          return await getData(nftModel, searchBy, fromDate, toDate);
-        };
-        [data, userCounts, bundleCount] = await Promise.all([
-          data(),
-          userCounts(),
-          bundleCount(),
-        ]);
-      }
-      if (searchBy == "Weekly") {
+      } else if (searchBy == "Weekly") {
         let sevenDaysFromNow = d.setDate(d.getDate() - 7);
         fromDate = new Date(sevenDaysFromNow).toISOString();
-        data = async () => {
-          return await getData(donationModel, searchBy, fromDate, toDate);
-        };
-        userCounts = async () => {
-          return await getData(userModel, searchBy, fromDate, toDate);
-        };
-        bundleCount = async () => {
-          return await getData(nftModel, searchBy, fromDate, toDate);
-        };
-        [data, userCounts, bundleCount] = await Promise.all([
-          data(),
-          userCounts(),
-          bundleCount(),
-        ]);
-      }
-      if (searchBy == "Monthly") {
+      } else if (searchBy == "Monthly") {
         let thirtyDaysFromNow = d.setDate(d.getDate() - 30);
         fromDate = new Date(thirtyDaysFromNow).toISOString();
-        data = async () => {
-          return await getData(donationModel, searchBy, fromDate, toDate);
-        };
-        userCounts = async () => {
-          return await getData(userModel, searchBy, fromDate, toDate);
-        };
-        bundleCount = async () => {
-          return await getData(nftModel, searchBy, fromDate, toDate);
-        };
-        [data, userCounts, bundleCount] = await Promise.all([
-          data(),
-          userCounts(),
-          bundleCount(),
-        ]);
-      }
-      if (searchBy == "Yearly") {
+      } else if (searchBy == "Yearly") {
         let oneYearFromNow = d.setDate(d.getDate() - 365);
         fromDate = new Date(oneYearFromNow).toISOString();
-        data = async () => {
-          return await getData(donationModel, searchBy, fromDate, toDate);
-        };
-        userCounts = async () => {
-          return await getData(userModel, searchBy, fromDate, toDate);
-        };
-        bundleCount = async () => {
-          return await getData(nftModel, searchBy, fromDate, toDate);
-        };
-        [data, userCounts, bundleCount] = await Promise.all([
-          data(),
-          userCounts(),
-          bundleCount(),
-        ]);
+      } else if (searchBy == "All") {
+        fromDate = new Date(0).toISOString(); // For All, use the earliest possible date
       }
-      if (searchBy == "All") {
-        data = async () => {
-          return await getData(donationModel, searchBy, fromDate, toDate);
-        };
-        userCounts = async () => {
-          return await getData(userModel, searchBy, fromDate, toDate);
-        };
-        bundleCount = async () => {
-          return await getData(nftModel, searchBy, fromDate, toDate);
-        };
-        [data, userCounts, bundleCount] = await Promise.all([
-          data(),
-          userCounts(),
-          bundleCount(),
-        ]);
-      }
+  
+      // Fetch data based on the calculated dates
+      data = async () => {
+        return await getData(donationModel, searchBy, fromDate, toDate);
+      };
+      userCounts = async () => {
+        return await getData(userModel, searchBy, fromDate, toDate);
+      };
+      bundleCount = async () => {
+        return await getData(nftModel, searchBy, fromDate, toDate);
+      };
+  
+      [data, userCounts, bundleCount] = await Promise.all([data(), userCounts(), bundleCount()]);
+  
+      // Process user counts
       if (userCounts.length != 0) {
         for (let j of userCounts) {
           if (j.userType === "Creator") {
@@ -1301,6 +1434,8 @@ class adminController {
           }
         }
       }
+  
+      // Return the result
       let obj = {
         userCount: userCount,
         uniqueWalletConnected: uniqueWalletConnected,
@@ -1310,33 +1445,16 @@ class adminController {
         subscriberCount: subscriberCount,
         creatorCount: creatorCount,
       };
+  
       return res.json(new response(obj, responseMessage.DATA_FOUND));
     } catch (error) {
       return next(error);
     }
   }
-
-  /**
-   * @swagger
-   * /admin/totalAdminBalance:
-   *   get:
-   *     tags:
-   *       - ADMIN
-   *     description: totalAdminBalance
-   *     produces:
-   *       - application/json
-   *     parameters:
-   *       - name: token
-   *         description: token
-   *         in: header
-   *         required: true
-   *     responses:
-   *       200:
-   *         description: Returns success message
-   */
-
+  
   async totalAdminBalance(req, res, next) {
     try {
+      // Find admin user
       let adminResult = await findUser({
         _id: req.userId,
         userType: userType.ADMIN,
@@ -1344,7 +1462,8 @@ class adminController {
       if (!adminResult) {
         return apiError.notFound(responseMessage.USER_NOT_FOUND);
       }
-
+  
+      // Fetch balances
       const mas = async () => {
         return await bnb.mas.balance(adminResult.ethAccount.address);
       };
@@ -1359,22 +1478,25 @@ class adminController {
       const fdusd = async () => {
         return await bnb.fdusd.balance(adminResult.ethAccount.address);
       };
+  
+      // Wait for all balance requests to complete
       const [masBalance, bnbBalance, usdtBalance, fdusdBalance] =
         await Promise.all([mas(), _bnb(), usdt(), fdusd()]);
-
+  
+      // Return the balances
       var obj = {
         masBalance,
         bnbBalance,
         usdtBalance,
         fdusdBalance,
       };
-
+  
       return res.json(new response(obj, responseMessage.DATA_FOUND));
     } catch (error) {
       return next(error);
     }
   }
-
+  
   /**
    * @swagger
    * /admin/getAdminTotalEarnings:
