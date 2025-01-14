@@ -353,11 +353,13 @@ class adminController {
  
   async login(req, res, next) {
       // تعريف المخطط باستخدام Joi
+         console.log("email",req.body.email);
       const validationSchema = Joi.object({
           email: Joi.string().email().required(),
           password: Joi.string().required(),
       });
   
+   
       try {
           // تحقق من صحة البيانات
           const { email, password } = await validationSchema.validateAsync(req.body);
@@ -375,7 +377,6 @@ class adminController {
           // if (!userResult) {
           //     return res.status(404).json(new response({}, responseMessage.USER_NOT_FOUND));
           // }
-        console.log("email",email);
         console.log("pass",password);
          const userResult = await findUser({ email });
         console.log("userRes",userResult);
